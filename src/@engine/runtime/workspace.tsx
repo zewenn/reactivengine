@@ -14,7 +14,7 @@
  */
 
 import { Result, lambda, printf } from "@engine/general";
-import { $, GetRoot, IsChildOf, Render } from "@engine/general/dom";
+import { $, $all, GetRoot, IsChildOf, Render } from "@engine/general/dom";
 import React, { Context } from "react";
 import SystemEvents from "./system";
 
@@ -54,12 +54,12 @@ export function Context(name: string): ContextNode {
 
     return {
         Name: name,
-        Self: Self!,
+        Self: Self,
         Render: (tsx: React.ReactNode) => {
-            Render(tsx, Self!);
+            Render(tsx, Self);
         },
         Query: (selector: string) => {
-            const Res = Self!.querySelector<HTMLElement>(selector);
+            const Res = Self.querySelector<HTMLElement>(selector);
             if (!Res) {
                 return [null, new Error("Element does not exist!")];
             }
@@ -67,6 +67,13 @@ export function Context(name: string): ContextNode {
         },
         Load: async () => {
             return new Promise<void>(async (resolve, reject) => {
+                const Ctxs = $all(".context");
+                for (const Ctx of Ctxs) {
+                    Ctx.classList.add("render-off");
+                }
+
+                Self.classList.remove("render-off");
+
                 await SystemEvents.Call(`Awake-${name}`);
                 await SystemEvents.Call(`Initalise-${name}`);
 

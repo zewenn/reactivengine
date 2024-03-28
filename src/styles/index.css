@@ -1,0 +1,15 @@
+body {
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    background-color: black;
+    color: white;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+.render-off {
+    display: none !important;
+}

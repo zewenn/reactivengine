@@ -1,12 +1,15 @@
+/** @field scripts  */
+import "./scripts/test";
+/** @close scripts  */
+
 import { printf } from "@engine/general";
 import { $, Main, Render } from "@engine/general/dom";
 import { ipcRenderer } from "electron";
 import Ipc_Singals from "../../ipc.config";
 import Start from "@engine/runtime";
 
-/** @field scripts  */
-import "./scripts/test";
-/** @close scripts  */
+
+import "@/styles/index.css";
 
 Main(async () => {
     window.addEventListener("keydown", (event) => {
