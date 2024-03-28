@@ -37,4 +37,3 @@ Window.Bind(
 );
 
 Window.Init();
-Window.browser_window?.webContents.setFrameRate(120);

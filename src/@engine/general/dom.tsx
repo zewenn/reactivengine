@@ -8,7 +8,11 @@ export function Main(Callback: lambda) {
         window.addEventListener("load", Callback);
         return;
     }
-    printf("!e", "Using Main without an HTML-DOM is not recommended.", "Most functions from @engine/dom will break!");
+    printf(
+        "!e",
+        "Using Main without an HTML-DOM is not recommended.",
+        "Most functions from @engine/dom will break!"
+    );
     Callback();
 }
 
@@ -37,10 +41,7 @@ export function GetRoot(): HTMLElement {
     return root;
 }
 
-
-export function $all<T extends HTMLElement>(
-    selector: string
-): T[] {
+export function $all<T extends HTMLElement>(selector: string): T[] {
     const Query_Result = document.querySelectorAll<T>(selector);
     return Array.from(Query_Result);
 }
@@ -48,12 +49,18 @@ export function $all<T extends HTMLElement>(
 export function Render(tsx: React.ReactNode, to?: HTMLElement) {
     if (!to) to = GetRoot();
 
-    to.innerHTML += renderToString(tsx);
+    const el = document.createElement("div");
+    el.innerHTML = renderToString(tsx);
+
+    for (const child of el.children) {
+        to.appendChild(child);
+    }
 }
 
-/**
- * $Component helps managing the element's after render
- */
+export function IsChildOf(parent: HTMLElement, child: HTMLElement) {
+    return !!parent.querySelector(child.className);
+}
+
 export interface BoundingBox {
     x: number;
     y: number;
@@ -67,10 +74,7 @@ function ProcessClassName(cls: string): string[] {
     return cls.split(" ");
 }
 
-export function IsClassName<T extends HTMLElement>(
-    element: T,
-    cls: string
-): boolean {
+export function IsClassName<T extends HTMLElement>(element: T, cls: string): boolean {
     const className = ProcessClassName(cls);
     for (let c in className) {
         if (!element.classList.contains(c)) {
@@ -80,11 +84,7 @@ export function IsClassName<T extends HTMLElement>(
     return true;
 }
 
-export function SetCSS<T extends HTMLElement>(
-    element: T,
-    property: string,
-    value: any
-): void {
+export function SetCSS<T extends HTMLElement>(element: T, property: string, value: any): void {
     element.style.setProperty(property, `${value}`);
 }
 

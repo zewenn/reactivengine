@@ -230,7 +230,7 @@ func AutoImportTSFiles(directory string) (string, error) {
 	var importStatements string
 
 	// Get a list of all .ts files in the specified directory
-	tsFiles, err := filepath.Glob(filepath.Join("./src/", directory, "*.ts*"))
+	tsFiles, err := filepath.Glob(filepath.Join("./src/game/", directory, "*.ts*"))
 	if err != nil {
 		return "", err
 	}
