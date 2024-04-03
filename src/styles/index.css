@@ -2,12 +2,59 @@ body {
     overflow: hidden;
     margin: 0;
     padding: 0;
-    background-color: black;
-    color: white;
 }
 
 html {
     scroll-behavior: smooth;
+}
+
+.context {
+    --font: 'Inter', sans-serif;
+    --screen-grey: rgba(112, 112, 112, 0.295);
+
+    --fallback-background-color: transparent;
+    --dev-scale: 100%;
+    --max-width: 100;
+
+    /* Aspect Ratio Settings */
+    --aspect-ratio-horizontal: 16;
+    --aspect-ratio-vertical: 9;
+
+    /* Font Settings */
+    --fs-extra-small-def: .5;
+    --fs-small-def: .9;
+    --fs-normal-def: 1.5;
+    --fs-large-def: 2.25;
+    --fs-extra-large-def: 7.5;
+    --fs-giant-def: 10;
+
+    /* Don't look at this - Actual Font-size */
+    --fs-extra-small: min(var(--fs-extra-small-def) * 1vw, calc((var(--fs-extra-small-def) * 1vh / var(--aspect-ratio-vertical)) * var(--aspect-ratio-horizontal)));
+    --fs-small: min(var(--fs-small-def) * 1vw, calc((var(--fs-small-def) * 1vh / var(--aspect-ratio-vertical)) * var(--aspect-ratio-horizontal)));
+    --fs-normal: min(var(--fs-normal-def) * 1vw, calc((var(--fs-normal-def) * 1vh / var(--aspect-ratio-vertical)) * var(--aspect-ratio-horizontal)));
+    --fs-large: min(var(--fs-large-def) * 1vw, calc((var(--fs-large-def) * 1vh / var(--aspect-ratio-vertical)) * var(--aspect-ratio-horizontal)));
+    --fs-extra-large: min(var(--fs-extra-large-def) * 1vw, calc((var(--fs-extra-large-def) * 1vh / var(--aspect-ratio-vertical)) * var(--aspect-ratio-horizontal)));
+    --fs-giant: min(var(--fs-giant-def) * 1vw, calc((var(--fs-giant-def) * 1vh / var(--aspect-ratio-vertical)) * var(--aspect-ratio-horizontal)));
+
+
+    /* Scr Unit */
+    --unit-def: 1;
+    --screen-unit: min(var(--unit-def) * 1vw, calc(var(--unit-def) * 1vh / var(--aspect-ratio-vertical) * var(--aspect-ratio-horizontal)));
+
+    display: block;
+    aspect-ratio: var(--aspect-ratio-horizontal) / var(--aspect-ratio-vertical);
+    /* width: min(calc(var(--max-width) * 1vw), calc(var(--max-width) * 1vh / var(--aspect-ratio-vertical) * var(--aspect-ratio-horizontal))); */
+    width: calc(var(--max-width) * var(--screen-unit));
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(var(--dev-scale));
+    background-color: var(--fallback-background-color);
+
+    overflow: hidden;
+    
+    outline: 1px solid var(--screen-grey);
+    box-shadow: 0px 4px 50px rgba(0, 0, 0, 0.25);
 }
 
 .render-off {

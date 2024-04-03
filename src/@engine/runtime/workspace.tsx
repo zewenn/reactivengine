@@ -1,17 +1,3 @@
-/**
- *
- * Script({
- *      use: MyContext,
- *      Awake: (res, rej) => {},
- *      Initalise: (res, rej) => {},
- *      Tick: (rej, rej) => {},
- *      Update: (res, rej) => {},
- * }).Bind(Scenes.Main)
- *
- *
- * Context.New()
- *
- */
 
 import { Result, lambda, printf } from "@engine/general";
 import { $, $all, GetRoot, IsChildOf, Render } from "@engine/general/dom";
