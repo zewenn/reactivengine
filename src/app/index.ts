@@ -1,39 +1,35 @@
-import ElectronWindow, { IpcMainEventFn } from "../@engine/general/electron";
+import Application from "@engine/general/electron";
 import Ipc_Singals from "@/../ipc.config";
 
-const Window = new ElectronWindow("", "windowed-fullscreen", {
+Application.Initalise({
     width: 1600,
     height: 900,
+    webPreferences: {
+        backgroundThrottling: false,
+        nodeIntegration: true,
+        contextIsolation: false,
+        offscreen: false,
+    },
+    frame: false,
+    fullscreen: false
+})
+
+Application.Bind({
+    [Ipc_Singals.Toggle_Developer_Tools]: () => {
+        if (!Application.Window) return;
+        if (Application.Window.webContents.isDevToolsOpened()) {
+            Application.Window.webContents.closeDevTools();
+            return;
+        }
+        Application.Window.webContents.openDevTools();
+    },
+    [Ipc_Singals.Exit_App]: () => {
+        if (!Application.Window) return;
+        Application.Window.close();
+    }
 });
 
-Window.Bind(
-    new Map<string, IpcMainEventFn>([
-        [
-            Ipc_Singals.Exit_App,
-            () => {
-                if (!Window.browser_window) return;
-                Window.browser_window.close();
-            },
-        ],
-        [
-            Ipc_Singals.Toggle_Developer_Tools,
-            () => {
-                if (!Window.browser_window) return;
-                if (Window.browser_window.webContents.isDevToolsOpened()) {
-                    Window.browser_window.webContents.closeDevTools();
-                    return;
-                }
-                Window.browser_window.webContents.openDevTools();
-            },
-        ],
-        [
-            Ipc_Singals.Reload,
-            () => {
-                if (!Window.browser_window) return;
-                Window.browser_window.reload();
-            },
-        ],
-    ])
-);
 
-Window.Init();
+Application.Ready((BWindow) => {
+    BWindow.webContents.setFrameRate(240);
+});
