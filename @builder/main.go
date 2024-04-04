@@ -19,7 +19,7 @@ var SCRIPT_DIRECTORIES = []string{}
 
 func main() {
 
-	entries, err := get_entries("main")
+	entries, err := get_entries()
 	if err != nil {
 		println("[FAIL] Program failed trying to find the entry point!")
 		println("Error:", err.Error())
@@ -161,7 +161,7 @@ func createFile(filename, contents string) error {
 	return nil
 }
 
-func get_entries(pattern string) ([]string, error) {
+func get_entries() ([]string, error) {
 	dir := "./src/game"
 	files, err := os.ReadDir(dir)
 	if err != nil {
@@ -171,7 +171,7 @@ func get_entries(pattern string) ([]string, error) {
 	// Use filepath.Glob to match files based on the pattern
 	var matchedFiles []string
 	for _, file := range files {
-		if strings.HasPrefix(file.Name(), fmt.Sprintf("[%s] ", pattern)) && (strings.HasSuffix(file.Name(), ".ts") || strings.HasSuffix(file.Name(), ".tsx")) {
+		if strings.HasPrefix(file.Name(), "index") && (strings.HasSuffix(file.Name(), ".ts") || strings.HasSuffix(file.Name(), ".tsx")) {
 			matchedFiles = append(matchedFiles, filepath.Join(dir, file.Name()))
 		}
 	}

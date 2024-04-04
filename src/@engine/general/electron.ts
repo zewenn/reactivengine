@@ -52,7 +52,7 @@ export default class ElectronWindow {
     }
 
     public BindConstructorOptions(
-        options: Electron.BrowserViewConstructorOptions
+        options: Electron.BrowserWindowConstructorOptions
     ) {
         for (const key in options) {
             this.bw_options[key] = options[key];
@@ -72,7 +72,7 @@ export default class ElectronWindow {
                     offscreen: false,
                 },
                 frame: this.mode !== "windowed-fullscreen",
-                fullscreen: this.mode === "fullscreen",
+                fullscreen: this.mode === "fullscreen"
             };
             for (const key in this.bw_options) {
                 options[key] = this.bw_options[key];
@@ -80,6 +80,7 @@ export default class ElectronWindow {
             
             const bw = new BrowserWindow(options);
             this.browser_window = bw;
+            this.browser_window.webContents.setFrameRate(240);
 
             Menu.setApplicationMenu(null);
             bw.loadFile('index.html');
@@ -87,7 +88,6 @@ export default class ElectronWindow {
 
         app.whenReady().then(() => {
             new_bw();
-            this.browser_window?.webContents.openDevTools();
         });
         
         app.on('window-all-closed', () => {

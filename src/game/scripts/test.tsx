@@ -1,5 +1,5 @@
-import { Script } from "@engine/runtime/workspace";
-import { MyContext, MyContext2 } from "@engine/runtime";
+import { Script } from "@engine/runtime";
+import { MyContext, MyContext2 } from "../contexts";
 import { printf } from "@engine/general";
 
 Script(MyContext, ({ Awake, Initalise, Tick, Render }) => {
