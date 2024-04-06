@@ -8,8 +8,7 @@ import { printf } from "@engine/general";
 import { $, Main, Render } from "@engine/general/dom";
 import { ipcRenderer } from "electron";
 import Ipc_Singals from "../../ipc.config";
-import { MyContext2 } from "./contexts";
-
+import Contexts from "./contexts";
 
 Main(async () => {
     window.addEventListener("keydown", (event) => {
@@ -21,5 +20,5 @@ Main(async () => {
         }
     });
 
-    await MyContext2.Load();
+    await Contexts.MyContext2.Load();
 });

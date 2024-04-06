@@ -46,7 +46,7 @@ export function $all<T extends HTMLElement>(selector: string): T[] {
     return Array.from(Query_Result);
 }
 
-export function Render(tsx: React.ReactNode, to?: HTMLElement) {
+export function Render(tsx: React.ReactNode, to?: HTMLElement): void {
     if (!to) to = GetRoot();
 
     const el = document.createElement("div");
@@ -57,7 +57,7 @@ export function Render(tsx: React.ReactNode, to?: HTMLElement) {
     }
 }
 
-export function IsChildOf(parent: HTMLElement, child: HTMLElement) {
+export function IsChildOf(parent: HTMLElement, child: HTMLElement): boolean {
     return !!parent.querySelector(child.className);
 }
 

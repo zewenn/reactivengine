@@ -6,7 +6,7 @@ export type PromiseCallback = (
     reject: (reason: any) => void
 ) => void;
 
-namespace SystemEvents {
+namespace Events {
     export const Event_Dict = new Map<string, PromiseCallback[]>([]);
 
     export function New(event_name: string): EventRegister {
@@ -57,4 +57,4 @@ namespace SystemEvents {
     }
 }
 
-export default SystemEvents;
+export default Events;

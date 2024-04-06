@@ -2,7 +2,8 @@
 import { Result, lambda, printf } from "@engine/general";
 import { $, $all, GetRoot, IsChildOf, Render } from "@engine/general/dom";
 import React, { Context } from "react";
-import SystemEvents from "./system";
+import Events from "./system";
+import Time from "./time";
 
 type PromiseLambda = lambda<
     [res: () => void | PromiseLike<void>, rej: (reason: any) => void],
@@ -60,21 +61,22 @@ export function Context(name: string): ContextNode {
 
                 Self.classList.remove("render-off");
 
-                await SystemEvents.Call(`Awake-${name}`);
-                await SystemEvents.Call(`Initalise-${name}`);
+                await Events.Call(`Awake-${name}`);
+                await Events.Call(`Initalise-${name}`);
 
                 if (tick_timer) clearInterval(tick_timer);
                 tick_timer = setInterval(async () => {
-                    SystemEvents.Call(`Tick-${name}`);
+                    Time.Tick();
+                    Events.Call(`Tick-${name}`);
                 }, 1);
 
                 resolve();
             });
         },
         Events: {
-            Awake: SystemEvents.New(`Awake-${name}`),
-            Initalise: SystemEvents.New(`Initalise-${name}`),
-            Tick: SystemEvents.New(`Tick-${name}`),
+            Awake: Events.New(`Awake-${name}`),
+            Initalise: Events.New(`Initalise-${name}`),
+            Tick: Events.New(`Tick-${name}`),
         },
     };
 }

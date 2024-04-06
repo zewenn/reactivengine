@@ -1,4 +1,4 @@
-import Application from "@engine/general/electron";
+import Application from "@engine/general/application";
 import Ipc_Singals from "@/../ipc.config";
 
 Application.Initalise({

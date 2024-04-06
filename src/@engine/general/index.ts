@@ -43,10 +43,7 @@ export type Matcher<T extends string | number | symbol> = {
 type MissingKeys<T extends K, K> = Pick<T, Exclude<keyof T, keyof K>>;
 
 export let IS_BROWSER_PROCESS: boolean | undefined = undefined;
-const Func_Cache: Map<lambda, Map<string, any>> = new Map<
-    lambda,
-    Map<string, any>
->([]);
+const Func_Cache: Map<lambda, Map<string, any>> = new Map<lambda, Map<string, any>>([]);
 
 /**
  *
@@ -104,7 +101,7 @@ export function PANIC<T extends Error>(msg: T): Never {
 /**
  * Cast a value as `T` but only if the value's type is a subset of the generic `T` type.
  */
-export function Cast<T>(x: Partial<T>) {
+export function Cast<T>(x: Partial<T> | T) {
     return x as T;
 }
 
@@ -123,10 +120,7 @@ export function ForceCast<T>(x: any) {
  * @param missing The missing keys of the new object type
  * @returns
  */
-export function ConvertCast<F, T extends F>(
-    obj: F,
-    missing?: MissingKeys<T, F>
-) {
+export function ConvertCast<F, T extends F>(obj: F, missing?: MissingKeys<T, F>) {
     const res: T = <T>obj;
     if (missing) {
         for (const key in missing) {
@@ -141,19 +135,28 @@ export function ConvertCast<F, T extends F>(
  * @param value
  * @returns
  */
-export function CastRef<T extends Object | Function>(
-    value: T
-): Ref<T> {
+export function CastRef<T extends Object | Function>(value: T): Ref<T> {
     return ForceCast<Ref<T>>(value);
 }
 
 /**
  * Creates a `structuredClone` of the object and cast it as `Val` to explicitly state that
  * this variable is only a value and won't change anywhere else.
+ *
+ * If the value is an `HTMLElement`, the clone is created with a different approach. 
+ * This is done using the `element.cloneNode()` function.
  * @param value
  * @returns
  */
 export function CastVal<T>(value: T): Val<T> {
+    if (typeof value === "function") {
+        return ForceCast<Val<T>>(value);
+    }
+
+    if (value instanceof HTMLElement) {
+        return ForceCast<Val<T>>(value.cloneNode());
+    }
+    
     return ForceCast<Val<T>>(structuredClone(value));
 }
 
@@ -163,10 +166,7 @@ export function CastVal<T>(value: T): Val<T> {
  * @param to
  * @returns
  */
-export function Match<T extends string | number | symbol>(
-    val: T,
-    to: Matcher<T>
-) {
+export function Match<T extends string | number | symbol>(val: T, to: Matcher<T>) {
     if (!to[val]) {
         return to["_"];
     }
