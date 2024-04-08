@@ -1,10 +1,10 @@
-
 import { Result, lambda, printf } from "@engine/stdlib";
 import { $, $all, GetRoot, IsChildOf, Render } from "@engine/stdlib/dom";
 import React, { Context } from "react";
 import Events, { EventRegister, PromiseCallback } from "./system";
 import Time from "./time";
 import Input from "./input";
+import { WebGPURenderer } from "./gpu";
 
 type PromiseLambda = lambda<
     [res: () => void | PromiseLike<void>, rej: (reason: any) => void],
@@ -27,20 +27,23 @@ interface ContextNode {
 interface ScriptProps {
     /**
      * Renders a React element to the Context.
-     * @param tsx 
-     * @param to 
-     * @returns 
+     * @param tsx
+     * @param to
+     * @returns
      */
     Render: (tsx: React.ReactNode, to?: HTMLElement) => void;
     Awake: (executor: PromiseLambda) => void;
     Initalise: (executor: PromiseLambda) => void;
     Tick: (executor: PromiseLambda) => void;
-    Listen: <K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions) => void
+    Listen: <K extends keyof HTMLElementEventMap>(
+        type: K,
+        listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any,
+        options?: boolean | AddEventListenerOptions
+    ) => void;
 }
 
-
 export namespace Reactivengine {
-    let tick_timer: Timer;
+    let tick_timer: NodeJS.Timer;
     let tick_function: () => void | undefined;
 
     export function SetTickFunction(Callback: () => void) {
@@ -49,6 +52,27 @@ export namespace Reactivengine {
 
     export function Start() {
         Input.WindowAwake();
+
+        const Canvas = document.createElement("canvas");
+        Canvas.className = `context-canvas`;
+
+        GetRoot().appendChild(Canvas);
+
+        function Scale() {
+            const [Context, Query_Error] = $(".context:not(.render-off)");
+            if (Query_Error) return;
+
+            Canvas.width = Context.offsetWidth;
+            Canvas.height = Context.offsetHeight;
+        }
+
+        Scale();
+        window.addEventListener("resize", Scale);
+
+        WebGPURenderer.start(Canvas, {
+            clearColor: { r: 0.2, g: 0.2, b: 0.2, a: 1.0 }, // Dark gray clear color
+        });
+        
 
         tick_timer = setInterval(async () => {
             Time.WindowTick();
@@ -63,7 +87,7 @@ export function Context(name: string): ContextNode {
     const Self = document.createElement("div");
     Self.className = `context context-${name}`;
 
-    GetRoot()!.appendChild(Self);
+    GetRoot().appendChild(Self);
 
     return {
         Name: name,
@@ -92,7 +116,7 @@ export function Context(name: string): ContextNode {
 
                 Reactivengine.SetTickFunction(function () {
                     Events.Call(`Tick-${name}`);
-                })
+                });
 
                 resolve();
             });
@@ -105,10 +129,7 @@ export function Context(name: string): ContextNode {
     };
 }
 
-export function Script(
-    Ctx: ContextNode,
-    Callback: lambda<[props: ScriptProps], void>
-): void {
+export function Script(Ctx: ContextNode, Callback: lambda<[props: ScriptProps], void>): void {
     const props: ScriptProps = {
         Render: (tsx: React.ReactNode, to?: HTMLElement) => {
             if (!to) {
@@ -127,9 +148,13 @@ export function Script(
         Awake: Ctx.Events.Awake,
         Initalise: Ctx.Events.Initalise,
         Tick: Ctx.Events.Tick,
-        Listen: <K extends keyof HTMLElementEventMap>(ty: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void => {
+        Listen: <K extends keyof HTMLElementEventMap>(
+            ty: K,
+            listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any,
+            options?: boolean | AddEventListenerOptions
+        ): void => {
             Ctx.Self.addEventListener(ty, listener);
-        }
+        },
     };
     Callback(props);
 }

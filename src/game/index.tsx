@@ -1,5 +1,5 @@
 /** @field scripts  */
-import "./scripts/test";
+import "./scripts/gpu";
 /** @close scripts  */
 
 import "@/styles/index.css";
@@ -12,6 +12,11 @@ import Contexts from "./contexts";
 import { Reactivengine } from "@engine/runtime";
 
 Main(async () => {
+
+    if (navigator.gpu) {
+        printf(await navigator.gpu.requestAdapter());
+    }
+
     window.addEventListener("keydown", (event) => {
         if (event.key === "F12") {
             ipcRenderer.send(Ipc_Singals.Toggle_Developer_Tools);
@@ -23,5 +28,5 @@ Main(async () => {
 
     Reactivengine.Start();
 
-    await Contexts.MyContext2.Load();
+    await Contexts.MyContext.Load();
 });
