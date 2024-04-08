@@ -25,10 +25,17 @@ interface ContextNode {
 }
 
 interface ScriptProps {
+    /**
+     * Renders a React element to the Context.
+     * @param tsx 
+     * @param to 
+     * @returns 
+     */
     Render: (tsx: React.ReactNode, to?: HTMLElement) => void;
     Awake: (executor: PromiseLambda) => void;
     Initalise: (executor: PromiseLambda) => void;
     Tick: (executor: PromiseLambda) => void;
+    Listen: <K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions) => void
 }
 
 
@@ -120,6 +127,9 @@ export function Script(
         Awake: Ctx.Events.Awake,
         Initalise: Ctx.Events.Initalise,
         Tick: Ctx.Events.Tick,
+        Listen: <K extends keyof HTMLElementEventMap>(ty: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void => {
+            Ctx.Self.addEventListener(ty, listener);
+        }
     };
     Callback(props);
 }

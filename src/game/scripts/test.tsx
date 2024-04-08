@@ -1,7 +1,6 @@
 import { Script } from "@engine/runtime";
 import Contexts from "../contexts";
 import { printf } from "@engine/stdlib";
-import Time from "@engine/runtime/time";
 import Input from "@engine/runtime/input";
 
 Script(Contexts.MyContext, ({ Awake, Initalise, Tick, Render }) => {
@@ -12,7 +11,7 @@ Script(Contexts.MyContext, ({ Awake, Initalise, Tick, Render }) => {
     });
 });
 
-Script(Contexts.MyContext2, ({ Awake, Initalise, Tick, Render }) => {
+Script(Contexts.MyContext2, ({ Awake, Initalise, Tick, Render, Listen }) => {
     Awake((res, rej) => {
         printf("Awake");
         Render(
@@ -20,6 +19,9 @@ Script(Contexts.MyContext2, ({ Awake, Initalise, Tick, Render }) => {
                 Rendered from <code>Awake</code>
             </div>
         );
+        Listen("mousedown", (event) => {
+            printf(event.clientX, event.clientY);
+        });
         res();
     });
 
@@ -42,5 +44,6 @@ Script(Contexts.MyContext2, ({ Awake, Initalise, Tick, Render }) => {
         if (Input.GetKeyUp("d")) {
             printf("GetKeyUp Works");
         }
+        res();
     });
 });
