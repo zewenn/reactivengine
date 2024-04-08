@@ -4,11 +4,12 @@ import "./scripts/test";
 
 import "@/styles/index.css";
 
-import { printf } from "@engine/general";
-import { $, Main, Render } from "@engine/general/dom";
+import { printf } from "@engine/stdlib";
+import { $, Main, Render } from "@engine/stdlib/dom";
 import { ipcRenderer } from "electron";
 import Ipc_Singals from "../../ipc.config";
 import Contexts from "./contexts";
+import { Reactivengine } from "@engine/runtime";
 
 Main(async () => {
     window.addEventListener("keydown", (event) => {
@@ -19,6 +20,8 @@ Main(async () => {
             ipcRenderer.send(Ipc_Singals.Exit_App);
         }
     });
+
+    Reactivengine.Start();
 
     await Contexts.MyContext2.Load();
 });

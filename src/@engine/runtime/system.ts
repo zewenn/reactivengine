@@ -1,4 +1,4 @@
-import { printf } from "@engine/general";
+import { printf } from "@engine/stdlib";
 
 export type EventRegister = (executor: PromiseCallback, queue_index?: number) => void;
 export type PromiseCallback = (

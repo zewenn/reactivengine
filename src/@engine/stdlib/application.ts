@@ -29,7 +29,7 @@ namespace Application {
         }
     }
 
-    export function Initalise(ConstructorOptions: Electron.BrowserWindowConstructorOptions) {
+    export function Use(ConstructorOptions: Electron.BrowserWindowConstructorOptions) {
         const NewBrowserWindow = () => {
             Window = new BrowserWindow(ConstructorOptions);
             Menu.setApplicationMenu(null);

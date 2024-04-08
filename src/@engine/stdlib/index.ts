@@ -209,3 +209,13 @@ export function Cache<T extends any[], R>(cb: lambda<T, R>): lambda<T, Val<R>> {
         return CastVal(res);
     };
 }
+
+
+export function NotImplemented() {
+    function Res() {
+        printf("!e", new Error(`This function is not implemented!`));
+        return new Error("Not Implemented!");
+    }
+
+    return Res;
+}

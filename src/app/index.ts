@@ -1,14 +1,14 @@
-import Application from "@engine/general/application";
+import Application from "@engine/stdlib/application";
 import Ipc_Singals from "@/../ipc.config";
 
-Application.Initalise({
+Application.Use({
     width: 1600,
     height: 900,
     webPreferences: {
         backgroundThrottling: false,
         nodeIntegration: true,
         contextIsolation: false,
-        offscreen: false,
+        offscreen: false
     },
     frame: false,
     fullscreen: false
@@ -30,6 +30,6 @@ Application.Bind({
 });
 
 
-Application.Ready((BWindow) => {
-    BWindow.webContents.setFrameRate(240);
+Application.Ready((Window) => {
+    Window.webContents.setFrameRate(240);
 });

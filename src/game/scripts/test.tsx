@@ -1,7 +1,8 @@
 import { Script } from "@engine/runtime";
 import Contexts from "../contexts";
-import { printf } from "@engine/general";
+import { printf } from "@engine/stdlib";
 import Time from "@engine/runtime/time";
+import Input from "@engine/runtime/input";
 
 Script(Contexts.MyContext, ({ Awake, Initalise, Tick, Render }) => {
     Awake((res, rej) => {
@@ -32,7 +33,14 @@ Script(Contexts.MyContext2, ({ Awake, Initalise, Tick, Render }) => {
     });
 
     Tick((res, rej) => {
-        printf(Time.DeltaTime());
-        res();
+        if (Input.GetKey("a")) {
+            printf("GetKey Works");
+        }
+        if (Input.GetKeyDown("s")) {
+            printf("GetKeyDown Works");
+        }
+        if (Input.GetKeyUp("d")) {
+            printf("GetKeyUp Works");
+        }
     });
 });

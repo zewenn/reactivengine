@@ -1,9 +1,10 @@
 
-import { Result, lambda, printf } from "@engine/general";
-import { $, $all, GetRoot, IsChildOf, Render } from "@engine/general/dom";
+import { Result, lambda, printf } from "@engine/stdlib";
+import { $, $all, GetRoot, IsChildOf, Render } from "@engine/stdlib/dom";
 import React, { Context } from "react";
-import Events from "./system";
+import Events, { EventRegister, PromiseCallback } from "./system";
 import Time from "./time";
+import Input from "./input";
 
 type PromiseLambda = lambda<
     [res: () => void | PromiseLike<void>, rej: (reason: any) => void],
@@ -30,7 +31,25 @@ interface ScriptProps {
     Tick: (executor: PromiseLambda) => void;
 }
 
-let tick_timer: Timer;
+
+export namespace Reactivengine {
+    let tick_timer: Timer;
+    let tick_function: () => void | undefined;
+
+    export function SetTickFunction(Callback: () => void) {
+        tick_function = Callback;
+    }
+
+    export function Start() {
+        Input.WindowAwake();
+
+        tick_timer = setInterval(async () => {
+            Time.WindowTick();
+            if (tick_function) tick_function();
+            Input.WindowTick();
+        }, 1);
+    }
+}
 
 export function Context(name: string): ContextNode {
     // Render(<div className={`context context-${name}`}></div>);
@@ -64,11 +83,9 @@ export function Context(name: string): ContextNode {
                 await Events.Call(`Awake-${name}`);
                 await Events.Call(`Initalise-${name}`);
 
-                if (tick_timer) clearInterval(tick_timer);
-                tick_timer = setInterval(async () => {
-                    Time.Tick();
+                Reactivengine.SetTickFunction(function () {
                     Events.Call(`Tick-${name}`);
-                }, 1);
+                })
 
                 resolve();
             });

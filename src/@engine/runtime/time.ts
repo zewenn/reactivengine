@@ -2,7 +2,7 @@ namespace Time {
     let current = Date.now();
     let last_frame_at = Date.now();
 
-    export function Tick() {
+    export function WindowTick() {
         last_frame_at = current;
         current = Date.now();
     }
