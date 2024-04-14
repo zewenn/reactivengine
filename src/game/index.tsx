@@ -1,5 +1,6 @@
 /** @field scripts  */
 import "./scripts/gpu";
+import "./scripts/pixi_test";
 /** @close scripts  */
 
 import "@/styles/index.css";
@@ -26,7 +27,7 @@ Main(async () => {
         }
     });
 
-    Reactivengine.Start();
+    await Reactivengine.Start();
 
     await Contexts.MyContext.Load();
 });

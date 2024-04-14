@@ -1,4 +1,4 @@
-import { NotImplemented } from "@engine/stdlib";
+import { NotImplemented, printf } from "@engine/stdlib";
 
 namespace Input {
     const KeyMap = new Map<string, boolean>([]);
@@ -25,6 +25,7 @@ namespace Input {
 
     export function WindowAwake() {
         window.addEventListener("keydown", (event) => {
+            printf("Window KeyDown");
             if (!KeyDownMap.get(event.key) && !KeyMap.get(event.key)) {
                 KeyDownMap.set(event.key, true);
             }

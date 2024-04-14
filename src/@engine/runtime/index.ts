@@ -4,7 +4,7 @@ import React, { Context } from "react";
 import Events, { EventRegister, PromiseCallback } from "./system";
 import Time from "./time";
 import Input from "./input";
-import { WebGPURenderer } from "./gpu";
+import PixiBridge from "./pixi_bridge";
 
 type PromiseLambda = lambda<
     [res: () => void | PromiseLike<void>, rej: (reason: any) => void],
@@ -44,41 +44,33 @@ interface ScriptProps {
 
 export namespace Reactivengine {
     let tick_timer: NodeJS.Timer;
-    let tick_function: () => void | undefined;
+    export let tick_function: () => void | undefined;
 
     export function SetTickFunction(Callback: () => void) {
         tick_function = Callback;
     }
 
-    export function Start() {
+    export async function Start() {
         Input.WindowAwake();
 
-        const Canvas = document.createElement("canvas");
-        Canvas.className = `context-canvas`;
+        await PixiBridge.Start({ background: '#1099bb', resizeTo: window });
 
-        GetRoot().appendChild(Canvas);
+        // const Canvas = document.createElement("canvas");
+        // Canvas.className = `context-canvas`;
 
-        function Scale() {
-            const [Context, Query_Error] = $(".context:not(.render-off)");
-            if (Query_Error) return;
+        // GetRoot().appendChild(Canvas);
 
-            Canvas.width = Context.offsetWidth;
-            Canvas.height = Context.offsetHeight;
-        }
+        // function Scale() {
+        //     const [Context, Query_Error] = $(".context:not(.render-off)");
+        //     if (Query_Error) return;
 
-        Scale();
-        window.addEventListener("resize", Scale);
+        //     Canvas.width = Context.offsetWidth;
+        //     Canvas.height = Context.offsetHeight;
+        // }
 
-        WebGPURenderer.start(Canvas, {
-            clearColor: { r: 0.2, g: 0.2, b: 0.2, a: 1.0 }, // Dark gray clear color
-        });
-        
+        // Scale();
+        // window.addEventListener("resize", Scale);
 
-        tick_timer = setInterval(async () => {
-            Time.WindowTick();
-            if (tick_function) tick_function();
-            Input.WindowTick();
-        }, 1);
     }
 }
 
@@ -117,6 +109,8 @@ export function Context(name: string): ContextNode {
                 Reactivengine.SetTickFunction(function () {
                     Events.Call(`Tick-${name}`);
                 });
+
+                PixiBridge.App_Instance.resizeTo = Self;
 
                 resolve();
             });
