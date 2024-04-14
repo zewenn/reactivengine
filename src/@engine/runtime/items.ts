@@ -1,6 +1,5 @@
 import { CastRef, Ref, Result } from '@engine/stdlib';
-import { Sprite, Texture } from 'pixi.js';
-import PixiBridge from './pixi_bridge';
+import { Reactivengine } from '.';
 
 export interface Vector2 {
     x: number;
@@ -99,7 +98,7 @@ export namespace Items {
 
     export function Register(Item: ComponentStack) {
         Registered.set(Item.identity.id, Item);
-        PixiBridge.Register(Item);
+        Reactivengine.RegisterItem(Item);
     }
 
     export function Query(id: string): Result<Ref<ComponentStack>, Error> {

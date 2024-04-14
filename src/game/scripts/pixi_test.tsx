@@ -2,7 +2,6 @@ import Contexts from "game/contexts";
 import { Script } from "@engine/runtime";
 
 import Items, { MakeTransform, Vec2, Vec3 } from "@engine/runtime/items";
-import PixiBridge from "@engine/runtime/pixi_bridge";
 
 import wojak_sprite from "../../assets/cryingwojak.jpg";
 import { printf } from "@engine/stdlib";
