@@ -24,12 +24,10 @@ Script(Contexts.MyContext, ({ Awake, Tick }) => {
         Items.Register(MyItem);
 
         Items.Expand(MyItem)
-            .Attach(Test.New("Hello"))
-            .Attach(Test.New("HelloW"))
-            .Attach(Test.New("HelloWo"))
-            .Attach(Test.New("HelloWor"));
+            .Attach("test", Test("Hello"))
+            .Attach("test2", Test("Hello World"));
 
-        printf(MyItem);
+        printf("MyItem:", MyItem);
 
         res();
     });

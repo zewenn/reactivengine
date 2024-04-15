@@ -7,7 +7,6 @@ namespace Test {
     }
     export function New(message?: string): Type {
         return {
-            component_name: "test",
             message: message ?? "hello world",
         };
     }

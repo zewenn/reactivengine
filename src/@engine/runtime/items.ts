@@ -13,18 +13,15 @@ export interface Vector3 {
 }
 
 export interface Component {
-    component_name: string;
     [key: string]: any;
 }
 
 export interface Identity extends Component {
-    component_name: "identity";
     id: string;
     name: string[];
 }
 
 export interface Transform extends Component {
-    component_name: "transform";
     position: Vector2;
     rotation: Vector3;
     scale: Vector2;
@@ -33,7 +30,6 @@ export interface Transform extends Component {
 }
 
 export interface Display extends Component {
-    component_name: "display";
     default_sprite: string;
 }
 
@@ -67,7 +63,6 @@ export function MakeTransform(
     transform: Transform | Partial<Transform> | null
 ): Transform {
     return {
-        component_name: "transform",
         position: transform?.position ?? Vec2(),
         rotation: transform?.rotation ?? Vec3(),
         scale: transform?.scale ?? Vec2(),
@@ -96,13 +91,11 @@ export namespace Items {
     ): ComponentStack {
         return {
             identity: {
-                component_name: "identity",
                 id: id,
                 name: name ?? [],
             },
             transform: transform ?? MakeTransform({}),
             display: {
-                component_name: "display",
                 default_sprite: default_sprite_url,
             },
         };
@@ -114,8 +107,8 @@ export namespace Items {
     }
 
     export function Expand(Item: ComponentStack) {
-        function Attach(New_Component: Component) {
-            Item[New_Component.component_name] = New_Component;
+        function Attach(component_name: string, New_Component: Component) {
+            Item[component_name] = New_Component;
             return { Attach };
         }
         return {
