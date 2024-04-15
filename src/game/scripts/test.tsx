@@ -1,12 +1,12 @@
+import wojak_sprite from "../../assets/cryingwojak.jpg";
+
 import Contexts from "game/contexts";
 import { Script } from "@engine/runtime";
-
 import Items, { MakeTransform, Vec2, Vec3 } from "@engine/runtime/items";
-
-import wojak_sprite from "../../assets/cryingwojak.jpg";
 import { printf } from "@engine/stdlib";
 import Input from "@engine/runtime/input";
 import Time from "@engine/runtime/time";
+import Test from "game/items/components/test";
 
 Script(Contexts.MyContext, ({ Awake, Tick }) => {
     Awake(async (res, rej) => {
@@ -22,6 +22,14 @@ Script(Contexts.MyContext, ({ Awake, Tick }) => {
         );
 
         Items.Register(MyItem);
+
+        Items.Expand(MyItem)
+            .Attach(Test.New("Hello"))
+            .Attach(Test.New("HelloW"))
+            .Attach(Test.New("HelloWo"))
+            .Attach(Test.New("HelloWor"));
+
+        printf(MyItem);
 
         res();
     });
