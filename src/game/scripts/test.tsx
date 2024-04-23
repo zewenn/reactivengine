@@ -9,7 +9,7 @@ import Time from "@engine/runtime/time";
 import { MakeTestComp } from "game/re-items/components/test";
 import { TestExpansion } from "game/re-items/structures/test";
 
-Script(Contexts.MyContext, ({ Awake, Tick }) => {
+Script(Contexts.MyContext, ({ Awake, Tick, Blit }) => {
     Awake(async () => {
         const MyItem = Items.New<TestExpansion>({
             identity: {
@@ -29,7 +29,7 @@ Script(Contexts.MyContext, ({ Awake, Tick }) => {
             },
         });
 
-        Items.Register(MyItem);
+        Blit(MyItem);
 
         printf("MyItem:", MyItem);
     });

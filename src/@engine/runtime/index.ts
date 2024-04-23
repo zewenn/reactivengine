@@ -1,12 +1,11 @@
-import { Result, lambda, printf } from "@engine/stdlib";
+import { Option, Result, lambda, printf } from "@engine/stdlib";
 import { $, $all, GetRoot, IsChildOf, Render } from "@engine/stdlib/dom";
 import React, { Context } from "react";
 import Events, { EventRegister } from "./events";
 import Time from "./time";
 import Input from "./input";
 import { Application, Assets, Sprite } from "pixi.js";
-import { ItemBase } from "./items";
-
+import Items, { ItemBase, ItemComponent, Item } from "./items";
 
 interface ContextNode {
     Name: string;
@@ -28,7 +27,7 @@ interface ScriptProps {
      * @param to
      * @returns
      */
-    Render: (tsx: React.ReactNode, to?: HTMLElement) => void;
+    UI: (tsx: React.ReactNode, to?: HTMLElement) => void;
     Awake: EventRegister;
     Initalise: EventRegister;
     Tick: EventRegister;
@@ -37,17 +36,24 @@ interface ScriptProps {
         listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any,
         options?: boolean | AddEventListenerOptions
     ) => void;
+    Blit: <T extends ItemComponent>(item: Item<T>) => void;
 }
 
 export namespace Reactivengine {
     let tick_timer: NodeJS.Timer;
-    export let tick_function: () => Promise<void> | undefined;
+    export let tick_function: Option<lambda<[], Promise<void>>>;
 
     /**
      * PixiBridge
      */
     export const App_Instance = new Application();
     const Sprite_Map = new Map<string, [Sprite, ItemBase]>([]);
+
+    export const Sprite_Item_Context_Map = new Map<
+        string,
+        Map<string, [Sprite, ItemBase]>
+    >([]);
+    export let current_context: Option<string>;
 
     export function SetTickFunction(Callback: () => Promise<void>) {
         tick_function = Callback;
@@ -73,15 +79,28 @@ export namespace Reactivengine {
         // await PixiBridge.Start({ background: '#1099bb', resizeTo: window });
     }
 
-    export async function RegisterItem(Item: ItemBase) {
-        if (!Sprite_Map.get(Item.identity.id)) {
+    export async function RegisterItem(Item: ItemBase, Context_Name: string) {
+        if (!Sprite_Item_Context_Map.get(Context_Name)) {
+            Sprite_Item_Context_Map.set(
+                Context_Name,
+                new Map<string, [Sprite, ItemBase]>([])
+            );
+        }
+
+        const Sprt_Map = Sprite_Item_Context_Map.get(Context_Name)!;
+
+        if (!Sprt_Map.get(Item.identity.id)) {
             await Assets.load(Item.display.default_sprite);
-            Sprite_Map.set(Item.identity.id, [
+            Sprt_Map.set(Item.identity.id, [
                 Sprite.from(Item.display.default_sprite),
                 Item,
             ]);
-            App_Instance.stage.addChild(Sprite_Map.get(Item.identity.id)![0]);
         }
+        Render_Sprite_Item_Tuple(
+            Sprt_Map.get(Item.identity.id)![0],
+            Sprt_Map.get(Item.identity.id)![1]
+        );
+        App_Instance.stage.addChild(Sprt_Map.get(Item.identity.id)![0]);
     }
 
     function Render_Sprite_Item_Tuple(Item_Sprite: Sprite, Item: ItemBase) {
@@ -107,7 +126,23 @@ export namespace Reactivengine {
     }
 
     function Render() {
-        for (const [key, [Item_Sprite, Item]] of Sprite_Map) {
+        if (!current_context) {
+            printf("No current context!");
+            return;
+        }
+
+        if (!Sprite_Item_Context_Map.get(current_context)) {
+            Sprite_Item_Context_Map.set(
+                current_context,
+                new Map<string, [Sprite, ItemBase]>([])
+            );
+        }
+
+        const Sprt_Map = Sprite_Item_Context_Map.get(current_context)!;
+
+        // printf(Sprt_Map);
+
+        for (const [key, [Item_Sprite, Item]] of Sprt_Map) {
             Render_Sprite_Item_Tuple(Item_Sprite, Item);
         }
     }
@@ -142,6 +177,8 @@ export function Context(name: string): ContextNode {
 
                 Self.classList.remove("render-off");
 
+                Reactivengine.current_context = name;
+
                 // Reactivengine.App_Instance.stage.removeChildren();
 
                 await Events.Call(`Awake-${name}`);
@@ -169,7 +206,7 @@ export function Script(
     Callback: lambda<[props: ScriptProps], void>
 ): void {
     const props: ScriptProps = {
-        Render: (tsx: React.ReactNode, to?: HTMLElement) => {
+        UI: (tsx: React.ReactNode, to?: HTMLElement) => {
             if (!to) {
                 to = Ctx.Self;
             } else if (!IsChildOf(Ctx.Self, to)) {
@@ -192,6 +229,9 @@ export function Script(
             options?: boolean | AddEventListenerOptions
         ): void => {
             Ctx.Self.addEventListener(ty, listener);
+        },
+        Blit: <T extends ItemComponent>(item: Item<T>) => {
+            Items.Register(item, Ctx.Name);
         },
     };
     Callback(props);
