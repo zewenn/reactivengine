@@ -1,7 +1,7 @@
 import { Result, lambda, printf } from "@engine/stdlib";
 import { $, $all, GetRoot, IsChildOf, Render } from "@engine/stdlib/dom";
 import React, { Context } from "react";
-import Events, { EventRegister, PromiseCallback } from "./system";
+import Events, { EventRegister, PromiseCallback } from "./events";
 import Time from "./time";
 import Input from "./input";
 import { Application, Assets, Sprite } from "pixi.js";
@@ -19,9 +19,9 @@ interface ContextNode {
     Query: lambda<[selector: string], Result<HTMLElement, Error>>;
     Load: () => Promise<void>;
     Events: {
-        Awake: (executor: PromiseLambda) => void;
-        Initalise: (executor: PromiseLambda) => void;
-        Tick: (executor: PromiseLambda) => void;
+        Awake: EventRegister;
+        Initalise: EventRegister;
+        Tick: EventRegister;
     };
 }
 
@@ -33,9 +33,9 @@ interface ScriptProps {
      * @returns
      */
     Render: (tsx: React.ReactNode, to?: HTMLElement) => void;
-    Awake: (executor: PromiseLambda) => void;
-    Initalise: (executor: PromiseLambda) => void;
-    Tick: (executor: PromiseLambda) => void;
+    Awake: EventRegister;
+    Initalise: EventRegister;
+    Tick: EventRegister;
     Listen: <K extends keyof HTMLElementEventMap>(
         type: K,
         listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any,
@@ -45,7 +45,7 @@ interface ScriptProps {
 
 export namespace Reactivengine {
     let tick_timer: NodeJS.Timer;
-    export let tick_function: () => void | undefined;
+    export let tick_function: () => Promise<void> | undefined;
 
     /**
      * PixiBridge
@@ -53,7 +53,7 @@ export namespace Reactivengine {
     export const App_Instance = new Application();
     const Sprite_Map = new Map<string, [Sprite, ItemBase]>([]);
 
-    export function SetTickFunction(Callback: () => void) {
+    export function SetTickFunction(Callback: () => Promise<void>) {
         tick_function = Callback;
     }
 
@@ -61,20 +61,18 @@ export namespace Reactivengine {
         Input.WindowAwake();
 
         await App_Instance.init({
-                resizeTo: window,
-            }
-        );
+            resizeTo: window,
+        });
 
         GetRoot().append(App_Instance.canvas);
 
         App_Instance.ticker.maxFPS = 240;
-        App_Instance.ticker.add((time) => {
+        App_Instance.ticker.add(async (time) => {
             Time.WindowTick();
-            if (!!Reactivengine.tick_function) Reactivengine.tick_function();
+            if (!!Reactivengine.tick_function) await Reactivengine.tick_function();
             Input.WindowTick();
             Render();
         });
-
 
         // await PixiBridge.Start({ background: '#1099bb', resizeTo: window });
     }
@@ -82,7 +80,10 @@ export namespace Reactivengine {
     export async function RegisterItem(Item: ItemBase) {
         if (!Sprite_Map.get(Item.identity.id)) {
             await Assets.load(Item.display.default_sprite);
-            Sprite_Map.set(Item.identity.id, [Sprite.from(Item.display.default_sprite), Item]);
+            Sprite_Map.set(Item.identity.id, [
+                Sprite.from(Item.display.default_sprite),
+                Item,
+            ]);
             App_Instance.stage.addChild(Sprite_Map.get(Item.identity.id)![0]);
         }
     }
@@ -145,11 +146,13 @@ export function Context(name: string): ContextNode {
 
                 Self.classList.remove("render-off");
 
+                // Reactivengine.App_Instance.stage.removeChildren();
+
                 await Events.Call(`Awake-${name}`);
                 await Events.Call(`Initalise-${name}`);
 
-                Reactivengine.SetTickFunction(function () {
-                    Events.Call(`Tick-${name}`);
+                Reactivengine.SetTickFunction(async function () {
+                    await Events.Call(`Tick-${name}`);
                 });
 
                 Reactivengine.App_Instance.resizeTo = Self;
@@ -165,7 +168,10 @@ export function Context(name: string): ContextNode {
     };
 }
 
-export function Script(Ctx: ContextNode, Callback: lambda<[props: ScriptProps], void>): void {
+export function Script(
+    Ctx: ContextNode,
+    Callback: lambda<[props: ScriptProps], void>
+): void {
     const props: ScriptProps = {
         Render: (tsx: React.ReactNode, to?: HTMLElement) => {
             if (!to) {

@@ -1,10 +1,7 @@
-import { printf } from "@engine/stdlib";
+import { lambda, printf } from "@engine/stdlib";
 
 export type EventRegister = (executor: PromiseCallback, queue_index?: number) => void;
-export type PromiseCallback = (
-    resolve: (value: void | PromiseLike<void>) => void,
-    reject: (reason: any) => void
-) => void;
+export type PromiseCallback = lambda<[], Promise<void>>;
 
 namespace Events {
     export const Event_Dict = new Map<string, PromiseCallback[]>([]);
@@ -33,23 +30,23 @@ namespace Events {
         };
     }
 
-    export async function Call(event_name: string) {
-        return new Promise<void>(async (resolve, reject) => {
-            const PromiseCallbacks = Event_Dict.get(event_name);
+    export async function Call(event_name: string): Promise<void> {
+        const PromiseCallbacks = Event_Dict.get(event_name);
 
-            if (!PromiseCallbacks) {
-                printf("!e", "Event wasn't registered!");
-                reject("Promises does not exitst!");
-                return;
-            }
+        if (!PromiseCallbacks) {
+            printf("!e", "Event wasn't registered!");
+            return;
+        }
 
-            const promises = PromiseCallbacks.map(
-                (promise_callback) => new Promise<void>(promise_callback)
-            );
+        for (const func of PromiseCallbacks) {
+            await func();
+        }
 
-            const res = await Promise.allSettled(promises);
-            resolve();
-        });
+        // const promises = PromiseCallbacks.map(
+        //     (promise_callback) => new Promise<void>(promise_callback)
+        // );
+
+        // await Promise.allSettled(promises);
     }
 
     export function Queue(index: number, Register: EventRegister, Callback: PromiseCallback) {
