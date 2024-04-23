@@ -1,16 +1,12 @@
 import { Result, lambda, printf } from "@engine/stdlib";
 import { $, $all, GetRoot, IsChildOf, Render } from "@engine/stdlib/dom";
 import React, { Context } from "react";
-import Events, { EventRegister, PromiseCallback } from "./events";
+import Events, { EventRegister } from "./events";
 import Time from "./time";
 import Input from "./input";
 import { Application, Assets, Sprite } from "pixi.js";
 import { ItemBase } from "./items";
 
-type PromiseLambda = lambda<
-    [res: () => void | PromiseLike<void>, rej: (reason: any) => void],
-    void
->;
 
 interface ContextNode {
     Name: string;

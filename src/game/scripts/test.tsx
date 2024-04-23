@@ -24,12 +24,13 @@ Script(Contexts.MyContext, ({ Awake, Tick }) => {
                     y: 100,
                 },
             },
-            test: MakeTestComp(null),
+            test: {
+                message: "Hello World!"
+            },
         });
 
         Items.Register(MyItem);
 
-        printf(wojak_sprite);
         printf("MyItem:", MyItem);
     });
 
