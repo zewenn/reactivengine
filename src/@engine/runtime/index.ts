@@ -5,7 +5,7 @@ import Events, { EventRegister, PromiseCallback } from "./system";
 import Time from "./time";
 import Input from "./input";
 import { Application, Assets, Sprite } from "pixi.js";
-import { ComponentStack } from "./items";
+import { ItemBase } from "./items";
 
 type PromiseLambda = lambda<
     [res: () => void | PromiseLike<void>, rej: (reason: any) => void],
@@ -51,7 +51,7 @@ export namespace Reactivengine {
      * PixiBridge
      */
     export const App_Instance = new Application();
-    const Sprite_Map = new Map<string, [Sprite, ComponentStack]>([]);
+    const Sprite_Map = new Map<string, [Sprite, ItemBase]>([]);
 
     export function SetTickFunction(Callback: () => void) {
         tick_function = Callback;
@@ -79,7 +79,7 @@ export namespace Reactivengine {
         // await PixiBridge.Start({ background: '#1099bb', resizeTo: window });
     }
 
-    export async function RegisterItem(Item: ComponentStack) {
+    export async function RegisterItem(Item: ItemBase) {
         if (!Sprite_Map.get(Item.identity.id)) {
             await Assets.load(Item.display.default_sprite);
             Sprite_Map.set(Item.identity.id, [Sprite.from(Item.display.default_sprite), Item]);
@@ -87,7 +87,7 @@ export namespace Reactivengine {
         }
     }
 
-    function Render_Sprite_Item_Tuple(Item_Sprite: Sprite, Item: ComponentStack) {
+    function Render_Sprite_Item_Tuple(Item_Sprite: Sprite, Item: ItemBase) {
         /**
          * Setting the position
          */

@@ -38,12 +38,20 @@ export interface Display extends Component {
  * Using an **ECS** (entity component system) allows the developer to make unique object without
  * using a lot of memory.
  */
-export interface ComponentStack {
+export interface ItemBase {
     identity: Identity;
     transform: Transform;
     display: Display;
-    [key: string]: Component;
 }
+
+export interface PartialItemBase {
+    identity: Partial<Identity> & { id: string };
+    transform?: Partial<Transform>;
+    display: Display;
+}
+
+export type ItemComponent = { [key: string]: Component };
+export type Item<T extends ItemComponent = {}> = ItemBase & T;
 
 export function Vec2(x: number = 0, y: number = 0): Vector2 {
     return {
@@ -71,8 +79,21 @@ export function MakeTransform(
     };
 }
 
+export type ItemFactoryOptions =
+    | {
+          Item: ItemBase;
+          [key: string]: any;
+      }
+    | {
+          default_sprite_url: string;
+          id: string;
+          name?: string[];
+          transform?: Transform;
+          [key: string]: any;
+      };
+
 export namespace Items {
-    const Registered = new Map<string, ComponentStack>([]);
+    const Registered = new Map<string, Item>([]);
 
     /**
      * Create a new ComponentStack with the given parameters;
@@ -83,45 +104,30 @@ export namespace Items {
      * @param transform
      * @returns
      */
-    export function New(
-        default_sprite_url: string,
-        id: string,
-        name?: string[],
-        transform?: Transform
-    ): ComponentStack {
-        return {
+    export function New<T extends ItemComponent = {}>(settings: PartialItemBase & T): Item<T> {
+        return ForceCast<Item<T>>({
+            ... settings,
             identity: {
-                id: id,
-                name: name ?? [],
+                id: settings.identity.id,
+                name: settings.identity.name ?? [],
             },
-            transform: transform ?? MakeTransform({}),
-            display: {
-                default_sprite: default_sprite_url,
-            },
-        };
+            transform: MakeTransform(settings.transform ?? null),
+        });
     }
 
-    export function Register(Item: ComponentStack) {
+    export function Register(Item: Item) {
         Registered.set(Item.identity.id, Item);
         Reactivengine.RegisterItem(Item);
     }
 
-    export function Expand(Item: ComponentStack) {
-        function Attach(component_name: string, New_Component: Component) {
-            Item[component_name] = New_Component;
-            return { Attach };
-        }
-        return {
-            Attach,
-        };
-    }
-
-    export function Query<T extends ComponentStack>(id: string): Result<Ref<T>, Error> {
+    export function Query<T extends ItemComponent = {}>(
+        id: string
+    ): Result<Ref<Item<T>>, Error> {
         const Query_Res = Registered.get(id);
         if (!Query_Res) {
             return [null, new Error("The selected Item does not exist")];
         }
-        return [CastRef(ForceCast<T>(Query_Res)), null];
+        return [CastRef(ForceCast<Item<T>>(Query_Res)), null];
     }
 }
 
