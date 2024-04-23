@@ -115,7 +115,7 @@ export namespace Items {
         });
     }
 
-    export function Register(Item: Item) {
+    export function Register<T extends ItemComponent>(Item: Item<T>) {
         Registered.set(Item.identity.id, Item);
         Reactivengine.RegisterItem(Item);
     }
