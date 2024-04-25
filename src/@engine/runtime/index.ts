@@ -40,20 +40,18 @@ interface ScriptProps {
 }
 
 export namespace Reactivengine {
-    let tick_timer: NodeJS.Timer;
     export let tick_function: Option<lambda<[], Promise<void>>>;
+    export let current_context: Option<string>;
 
     /**
      * PixiBridge
      */
-    export const App_Instance = new Application();
-    const Sprite_Map = new Map<string, [Sprite, ItemBase]>([]);
+    export const App_Instance = new Application()
 
-    export const Sprite_Item_Context_Map = new Map<
+    export const Context_Sprite_Item_Map = new Map<
         string,
         Map<string, [Sprite, ItemBase]>
     >([]);
-    export let current_context: Option<string>;
 
     export function SetTickFunction(Callback: () => Promise<void>) {
         tick_function = Callback;
@@ -71,7 +69,7 @@ export namespace Reactivengine {
         App_Instance.ticker.maxFPS = 240;
         App_Instance.ticker.add(async (time) => {
             Time.WindowTick();
-            if (!!Reactivengine.tick_function) await Reactivengine.tick_function();
+            if (Reactivengine.tick_function) await Reactivengine.tick_function();
             Input.WindowTick();
             Render();
         });
@@ -80,14 +78,14 @@ export namespace Reactivengine {
     }
 
     export async function RegisterItem(Item: ItemBase, Context_Name: string) {
-        if (!Sprite_Item_Context_Map.get(Context_Name)) {
-            Sprite_Item_Context_Map.set(
+        if (!Context_Sprite_Item_Map.get(Context_Name)) {
+            Context_Sprite_Item_Map.set(
                 Context_Name,
                 new Map<string, [Sprite, ItemBase]>([])
             );
         }
 
-        const Sprt_Map = Sprite_Item_Context_Map.get(Context_Name)!;
+        const Sprt_Map = Context_Sprite_Item_Map.get(Context_Name)!;
 
         if (!Sprt_Map.get(Item.identity.id)) {
             await Assets.load(Item.display.default_sprite);
@@ -131,14 +129,14 @@ export namespace Reactivengine {
             return;
         }
 
-        if (!Sprite_Item_Context_Map.get(current_context)) {
-            Sprite_Item_Context_Map.set(
+        if (!Context_Sprite_Item_Map.get(current_context)) {
+            Context_Sprite_Item_Map.set(
                 current_context,
                 new Map<string, [Sprite, ItemBase]>([])
             );
         }
 
-        const Sprt_Map = Sprite_Item_Context_Map.get(current_context)!;
+        const Sprt_Map = Context_Sprite_Item_Map.get(current_context)!;
 
         // printf(Sprt_Map);
 
@@ -220,18 +218,18 @@ export function Script(
             }
             Render(tsx, to);
         },
+        Blit: <T extends ItemComponent>(item: Item<T>) => {
+            Items.Register(item, Ctx.Name);
+        },
         Awake: Ctx.Events.Awake,
         Initalise: Ctx.Events.Initalise,
         Tick: Ctx.Events.Tick,
         Listen: <K extends keyof HTMLElementEventMap>(
-            ty: K,
+            type: K,
             listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any,
             options?: boolean | AddEventListenerOptions
         ): void => {
-            Ctx.Self.addEventListener(ty, listener);
-        },
-        Blit: <T extends ItemComponent>(item: Item<T>) => {
-            Items.Register(item, Ctx.Name);
+            Ctx.Self.addEventListener(type, listener);
         },
     };
     Callback(props);
