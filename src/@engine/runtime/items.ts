@@ -1,4 +1,4 @@
-import { Cast, CastRef, ForceCast, Ref, Result } from "@engine/stdlib";
+import { Cast, CastRef, ForceCast, Incomplete, Ref, Result } from "@engine/stdlib";
 import { Reactivengine } from ".";
 
 export interface Vector2 {
@@ -68,7 +68,7 @@ export function Vec3(x: number = 0, y: number = 0, z: number = 0): Vector3 {
 }
 
 export function MakeTransform(
-    transform: Transform | Partial<Transform> | null
+    transform: Incomplete<Transform>
 ): Transform {
     return {
         position: transform?.position ?? Vec2(),

@@ -15,6 +15,11 @@ export type Result<T, Err extends Error> = [T, null] | [null, Err];
 export type Option<T> = T | undefined;
 
 /**
+ * An object or a Patrial object or null
+ */
+export type Incomplete<T extends object> = T | Partial<T> | null;
+
+/**
  * Never is a phantom which helps defining types
  */
 export type Never = { __phantom__: "Never" };

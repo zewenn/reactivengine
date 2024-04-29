@@ -22,7 +22,7 @@ Script(Contexts.MyContext, ({ Awake, Tick, Blit }) => {
                 scale: {
                     x: 100,
                     y: 100,
-                },
+                }
             },
             test: {
                 message: "Hello World!"
